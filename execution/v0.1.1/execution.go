@@ -103,6 +103,8 @@ func (e EnvironmentV011) Validate() error {
 		if e.ControllerID == "" {
 			return fmt.Errorf("missing controller ID")
 		}
+	case common.GetInstancePriceCommand:
+		return common.ValidatePriceParams(e.BootstrapParams)
 	case common.GetVersionCommand, common.GetSupportedInterfaceVersionsCommand,
 		common.ValidatePoolInfoCommand, common.GetConfigJSONSchemaCommand,
 		common.GetExtraSpecsJSONSchemaCommand:
@@ -163,6 +165,12 @@ func (e EnvironmentV011) Run(ctx context.Context, provider ExternalProvider) (st
 		if err := provider.Stop(ctx, e.InstanceID, true); err != nil {
 			return "", fmt.Errorf("failed to stop instance: %w", err)
 		}
+	case common.GetInstancePriceCommand:
+		result, err := common.RunGetInstancePrice(ctx, provider, e.BootstrapParams)
+		if err != nil {
+			return "", err
+		}
+		ret = result
 	case common.GetVersionCommand:
 		version := provider.GetVersion(ctx)
 		ret = string(version)

@@ -98,6 +98,8 @@ func (e EnvironmentV010) Validate() error {
 		if e.ControllerID == "" {
 			return fmt.Errorf("missing controller ID")
 		}
+	case common.GetInstancePriceCommand:
+		return common.ValidatePriceParams(e.BootstrapParams)
 	case common.GetVersionCommand:
 		return nil
 	default:
@@ -156,6 +158,12 @@ func (e EnvironmentV010) Run(ctx context.Context, provider ExternalProvider) (st
 		if err := provider.Stop(ctx, e.InstanceID, true); err != nil {
 			return "", fmt.Errorf("failed to stop instance: %w", err)
 		}
+	case common.GetInstancePriceCommand:
+		result, err := common.RunGetInstancePrice(ctx, provider, e.BootstrapParams)
+		if err != nil {
+			return "", err
+		}
+		ret = result
 	case common.GetVersionCommand:
 		version := provider.GetVersion(ctx)
 		ret = string(version)
