@@ -100,6 +100,10 @@ func (e EnvironmentV010) Validate() error {
 		}
 	case common.GetInstancePriceCommand:
 		return common.ValidatePriceParams(e.BootstrapParams)
+	case common.GetInstanceEgressCommand:
+		if e.InstanceID == "" {
+			return fmt.Errorf("missing instance ID")
+		}
 	case common.GetVersionCommand:
 		return nil
 	default:
@@ -160,6 +164,12 @@ func (e EnvironmentV010) Run(ctx context.Context, provider ExternalProvider) (st
 		}
 	case common.GetInstancePriceCommand:
 		result, err := common.RunGetInstancePrice(ctx, provider, e.BootstrapParams)
+		if err != nil {
+			return "", err
+		}
+		ret = result
+	case common.GetInstanceEgressCommand:
+		result, err := common.RunGetInstanceEgress(ctx, provider, e.InstanceID)
 		if err != nil {
 			return "", err
 		}
